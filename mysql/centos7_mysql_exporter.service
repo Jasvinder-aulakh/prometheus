@@ -1,0 +1,48 @@
+[Unit]
+Description=Mysql Exporter
+
+[Service]
+User=mysql_exporter
+ExecStart=/usr/local/mysqld_exporter/mysqld_exporter  \
+  --collect.info_schema.processlist.min_time=0 \
+  --collect.info_schema.processlist.processes_by_user  \
+  --collect.info_schema.processlist.processes_by_host  \
+  --collect.info_schema.tables.databases="*" \
+  --collect.mysql.user.privileges \
+  --collect.perf_schema.file_instances.filter=".*" \
+  --web.listen-address=:9104 \
+  --web.telemetry-path=/metrics \
+  --collect.mysql.user \
+  --collect.info_schema.tables \
+  --collect.info_schema.innodb_tablespaces \
+  --collect.info_schema.innodb_metrics \
+  --collect.global_status \
+  --collect.global_variables \
+  --collect.slave_status \
+  --collect.info_schema.processlist \
+  --collect.perf_schema.tablelocks  \
+  --collect.perf_schema.eventsstatements \
+  --collect.perf_schema.eventswaits \
+  --collect.perf_schema.file_events \
+  --collect.auto_increment.columns \
+  --collect.binlog_size \
+  --collect.perf_schema.tableiowaits \
+  --collect.perf_schema.indexiowaits \
+  --collect.info_schema.tablestats \
+  --collect.info_schema.query_response_time \
+  --collect.perf_schema.file_instances \
+  --collect.perf_schema.replication_group_member_stats \
+  --collect.info_schema.userstats \
+  --collect.info_schema.clientstats \
+  --collect.engine_innodb_status \
+  --collect.slave_hosts
+
+SyslogIdentifier=mysql_exporter
+Restart=always
+RestartSec=90
+StartLimitInterval=400
+StartLimitBurst=3
+
+
+[Install]
+WantedBy=multi-user.target
