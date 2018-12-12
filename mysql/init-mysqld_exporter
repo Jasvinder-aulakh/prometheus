@@ -2,7 +2,7 @@
 # mysqld_exporter    This shell script takes care of starting and stopping mysqld_exporter
 #
 # chkconfig: 2345 80 80
-# description: Prometheus Mysqld exporter start script
+# description: Mysqld exporter start script
 # processname: mysqld_exporter
 # config: /etc/.mysqld_exporter.cnf
 # pidfile: /var/run/mysqld_exporter.pid
@@ -13,7 +13,7 @@
 RETVAL=0
 PROGNAME=mysqld_exporter
 PROG=/usr/local/mysqld_exporter/${PROGNAME}
-RUNAS=prometheus
+RUNAS=exporter
 LOCKFILE=/var/lock/subsys/${PROGNAME}
 PIDFILE=/var/run/${PROGNAME}.pid
 LOGFILE=/var/log/${PROGNAME}.log
