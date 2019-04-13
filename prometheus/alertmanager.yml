@@ -1,0 +1,37 @@
+global:
+  # The smarthost and SMTP sender used for mail notifications.
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'watchman@birdeye.com'
+  smtp_auth_username: 'watchman@birdeye.com'
+  smtp_auth_password: 'bivjtftjkucikbbd'
+
+# The root route on which each incoming alert enters.
+route:
+  receiver: 'devops'
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 3h
+
+  # The child route trees.
+  routes:
+  - match_re:
+      service: ^(JobInstanceDown|LoadAverage15m|HostCPUUtilisation|MemoryFree10%|DiskSpace10%Free)$
+    receiver: devops
+  - match:
+      service: files
+    receiver: team-Y-mails
+inhibit_rules:
+- source_match:
+    severity: 'critical'
+  target_match:
+    severity: 'warning'
+  equal: ['alertname']
+
+receivers:
+- name: 'devops'
+  email_configs:
+  - to: 'devops_int@birdeye.com, bam@birdeye.com'
+
+- name: 'team-Y-mails'
+  email_configs:

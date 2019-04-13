@@ -1,0 +1,139 @@
+# my global config
+global:
+  scrape_interval:     30s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  evaluation_interval: 30s # Evaluate rules every 15 seconds. The default is every 1 minute.
+  # scrape_timeout is set to the global default (10s).
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+  - static_configs:
+    - targets:
+       - infra-alertmanager-master-prod-1:9093
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+rule_files:
+    - "rules/node_rules.yml"
+    - "rules/website_rules.yml"
+  # - "second_rules.yml"
+
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  - job_name: 'prometheus'
+    static_configs:
+    - targets: ['localhost:9090']
+
+#### AWS Cloud watch config
+#### AWS Cloud watch config
+#  - job_name: "AWS"
+#    file_sd_configs:
+#    - files:
+#      - aws.yml
+
+#### Define Kafka Servers
+  - job_name: "KAFKA"
+    file_sd_configs:
+    - files:
+      - kafka-nodes.yml
+
+#### Define Kafka Cluster Servers
+  - job_name: "KAFKA_CLUSTER"
+    file_sd_configs:
+    - files:
+      - kafka-cluster.yml
+
+#### Define Kafka Servers
+  - job_name: "KAFKA_CONNECT"
+    file_sd_configs:
+    - files:
+      - kafka-connect.yml
+
+#### Define Zookeeper Cluster Servers
+  - job_name: "ZOOKEEPER_CLUSTER"
+    file_sd_configs:
+    - files:
+      - zookeeper-cluster.yml
+
+#### Define Redis Servers
+  - job_name: "REDIS"
+    file_sd_configs:
+    - files:
+      - redis-nodes.yml
+
+#### Define AEROSPIKE Nodes
+  - job_name: "aerospike_exporter"
+    file_sd_configs:
+    - files:
+      - aerospike.yml
+
+#### Define FREE ENV Node Servers
+  - job_name: "FREE"
+    file_sd_configs:
+    - files:
+      - free-bam-nodes.yml
+
+#### Define Data-pipeline servers
+  - job_name: "DATAPIPELINE"
+    file_sd_configs:
+    - files:
+      - data-pipeline.yml
+
+#### Define INTEGRATION Node Servers
+  - job_name: "INTEGRATION"
+    file_sd_configs:
+    - files:
+      - integration-nodes.yml
+
+
+#### Define Growth ENV Node Servers
+  - job_name: "GROWTH"
+    file_sd_configs:
+    - files:
+      - growth-nodes.yml
+
+### Defines Varnish Servers
+  - job_name: "varnish_exporter"
+    file_sd_configs:
+    - files:
+      - varnish.yml
+
+### Defines Mysql Servers
+  - job_name: "MYSQL"
+    file_sd_configs:
+    - files:
+      - mysql.yml
+
+### Defines Jenkins Servers
+  - job_name: "Jenkins"
+    metrics_path: /prometheus
+    file_sd_configs:
+    - files:
+      - jenkins.yml
+
+#blackbox
+  - job_name: 'blackbox'
+    metrics_path: /probe
+    params:
+      module: [http_2xx, icmp]  # Look for a HTTP 200 response.
+    file_sd_configs:
+      - files:
+        - '/app/blackbox/sites/*.yml'
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: (.*)(:80)?
+        target_label: __param_target
+        replacement: ${1}
+      - source_labels: [__param_target]
+        regex: (.*)
+        target_label: instance
+        replacement: ${1}
+      - source_labels: []
+        regex: .*
+        target_label: __address__
+        replacement: 127.0.0.1:9115
+
+
+
+##############

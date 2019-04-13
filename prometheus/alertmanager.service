@@ -1,0 +1,14 @@
+[Unit]
+Description=Alertmanager
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=alertmanager
+Group=alertmanager
+Type=simple
+WorkingDirectory=/app/alertmanager/
+ExecStart=/app/alertmanager/alertmanager --config.file=/app/alertmanager/alertmanager.yml --web.external-url http://10.51.12.7:9093
+
+[Install]
+WantedBy=multi-user.target
