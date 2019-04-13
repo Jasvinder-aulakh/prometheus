@@ -1,78 +1,3 @@
-groups:
-  - name: recording_rules
-    interval: 15s
-    rules:
-      - record: instance:node_cpu_utilization_percent:rate5m
-        expr: 100 * (1 - avg by(instance)(irate(node_cpu{mode='idle'}[5m])))
-
-      - record: node_exporter:node_filesystem_free:fs_used_percents
-        expr: 100 - 100 * ( node_filesystem_free{mountpoint="/"} / node_filesystem_size{mountpoint="/"} )
-
-      - record: node_exporter:node_memory_free:memory_used_percents
-        expr: 100 - 100 * (node_memory_MemFree / node_memory_MemTotal)
-
-      - record: alerts_fired:24h
-        expr:   sort_desc(sum(sum_over_time(ALERTS{alertstate=`firing`}[24h])) by (alertname))
-
-  - name: alerting_rules
-    rules:
-      - alert: HostCPUUtilisation
-        expr: 100 - (avg by(instance) (irate(node_cpu{mode="idle"}[5m])) * 100) > 70
-        for: 10m
-        labels:
-          severity: warning
-        annotations:
-          description: 'High CPU utilisation detected for instance {{ $labels.instance_id}} tagged as: {{ $labels.instance_name_tag }}, the utilisation is currently:{{ $value }}%'
-          summary: CPU Utilisation Alert
-
-      - alert: LoadAverage15m
-        expr: node_load15 >= 6.00
-        labels:
-          severity: major
-        annotations:
-          summary: "Instance {{ $labels.instance }} - high load average"
-          description: "{{ $labels.instance  }} (measured by {{ $labels.job }}) has high load average ({{ $value }}) over 15 minutes."
-
-      - alert: JobInstanceDown
-        expr: up == 0
-        for: 5m
-        labels:
-          severity: critical
-        annotations:
-          summary: "Instance {{ $labels.instance }} - instance is down"
-          description: "Instance {{ $labels.instance }} instance {{ $labels.instance }} is down."
-
-      - alert: MemoryFree10%
-        expr: node_exporter:node_memory_free:memory_used_percents >= 90
-        for: 5m
-        labels:
-          severity: critical
-        annotations:
-          summary: "Instance {{ $labels.instance }} hight memory usage"
-          description: "{{ $labels.instance }} has more than 90% of its memory used."
-
-      - alert: DiskSpace10%Free
-        expr: node_exporter:node_filesystem_free:fs_used_percents >= 90
-        labels:
-          severity: moderate
-        annotations:
-          summary: "Instance {{ $labels.instance }} is low on disk space"
-          description: "{{ $labels.instance }} has only {{ $value }}% free."
-[root@infra-prometheus-prod-1 prometheus]# ll
-total 96204
--rw-r--r--  1 prometheus prometheus    11357 Jan 31 12:17 LICENSE
--rw-r--r--  1 prometheus prometheus     2769 Jan 31 12:17 NOTICE
-drwxr-xr-x  2 prometheus root             54 Apr 10 05:47 aggregation
-drwxr-xr-x  2 root       root             28 Apr 10 05:30 backup
-drwxr-xr-x  2 prometheus prometheus       38 Jan 31 12:17 console_libraries
-drwxr-xr-x  2 prometheus prometheus      173 Jan 31 12:17 consoles
-drwxr-xr-x 26 prometheus prometheus     4096 Apr 13 13:00 data
--rwxr-xr-x  1 prometheus prometheus 60097588 Jan 31 11:18 prometheus
--rw-r--r--  1 root       root          18916 Apr 10 07:38 prometheus.yml
--rw-r--r--  1 root       root            926 Feb 11 11:12 prometheus.yml.original
--rwxr-xr-x  1 prometheus prometheus 38359349 Jan 31 11:19 promtool
--rw-r--r--  1 root       root           2423 Feb 25 05:57 rules.yml
-[root@infra-prometheus-prod-1 prometheus]# cat prometheus.yml
 # my global config
 global:
   scrape_interval:     120s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
@@ -104,7 +29,7 @@ scrape_configs:
 ##########################################################################
 ##########################################################################
 
-  - job_name: 'AGG1-FreeProd-DailyReviewAggregation'
+  - job_name: 'AGG1-name'
     ec2_sd_configs:
     - region: us-east-1
       refresh_interval: 300s
@@ -112,10 +37,10 @@ scrape_configs:
       filters:
       - name: tag:Team
         values:
-          - Aggregation
+          - name
       - name: tag:Name
         values:
-          - FreeProd-DailyReviewAggregation
+          - name
       - name: tag:Environment
         values:
           - FREE-Production
@@ -129,7 +54,7 @@ scrape_configs:
       replacement: '${1}:9100'   # Have to specify a port too.
 
 
-  - job_name: 'AGG1-FreeProd-DailyReviewAggregationRetry'
+  - job_name: 'AGG1-nameRetry'
     ec2_sd_configs:
     - region: us-east-1
       refresh_interval: 300s
@@ -137,10 +62,10 @@ scrape_configs:
       filters:
       - name: tag:Team
         values:
-          - Aggregation
+          - name
       - name: tag:Name
         values:
-          - FreeProd-DailyReviewAggregationRetry
+          - nameRetry
       - name: tag:Environment
         values:
           - FREE-Production
@@ -153,7 +78,7 @@ scrape_configs:
       target_label: __address__
       replacement: '${1}:9100'   # Have to specify a port too.
 
-  - job_name: 'AGG1-FreeProd-ReaggregationReviewAggregation'
+  - job_name: 'AGG1-FreeProd-namenamename'
     ec2_sd_configs:
     - region: us-east-1
       refresh_interval: 300s
@@ -161,10 +86,10 @@ scrape_configs:
       filters:
       - name: tag:Team
         values:
-          - Aggregation
+          - name
       - name: tag:Name
         values:
-          - FreeProd-ReaggregationReviewAggregation
+          - FreeProd-namenamename
       - name: tag:Environment
         values:
           - FREE-Production
@@ -177,7 +102,7 @@ scrape_configs:
       target_label: __address__
       replacement: '${1}:9100'   # Have to specify a port too.
 
-  - job_name: 'AGG1-FreeProd-SearchProfileAggregation'
+  - job_name: 'AGG1-FreeProd-SearchProfilename'
     ec2_sd_configs:
     - region: us-east-1
       refresh_interval: 300s
@@ -185,10 +110,10 @@ scrape_configs:
       filters:
       - name: tag:Team
         values:
-          - Aggregation
+          - name
       - name: tag:Name
         values:
-          - FreeProd-SearchProfileAggregation
+          - FreeProd-SearchProfilename
       - name: tag:Environment
         values:
           - FREE-Production
@@ -201,7 +126,7 @@ scrape_configs:
       target_label: __address__
       replacement: '${1}:9100'   # Have to specify a port too.
 
-  - job_name: 'AGG1-FreeProd-SearchProfileAggregationRetry-1'
+  - job_name: 'AGG1-FreeProd-SearchProfilenameRetry-1'
     ec2_sd_configs:
     - region: us-east-1
       refresh_interval: 300s
@@ -209,10 +134,10 @@ scrape_configs:
       filters:
       - name: tag:Team
         values:
-          - Aggregation
+          - name
       - name: tag:Name
         values:
-          - FreeProd-SearchProfileAggregationRetry-1
+          - FreeProd-SearchProfilenameRetry-1
       - name: tag:Environment
         values:
           - FREE-Production
@@ -225,7 +150,7 @@ scrape_configs:
       target_label: __address__
       replacement: '${1}:9100'   # Have to specify a port too.
 
-  - job_name: 'AGG1-prod-paid-aggregation-daily-review-agg'
+  - job_name: 'AGG1-prod-paid-name-daily-review-agg'
     ec2_sd_configs:
     - region: us-east-1
       refresh_interval: 300s
@@ -233,10 +158,10 @@ scrape_configs:
       filters:
       - name: tag:Team
         values:
-          - aggregation
+          - name
       - name: tag:Name
         values:
-          - prod-paid-aggregation-daily-review-agg
+          - prod-paid-name-daily-review-agg
       - name: tag:Environment
         values:
           - prod
@@ -249,7 +174,7 @@ scrape_configs:
       target_label: __address__
       replacement: '${1}:9100'   # Have to specify a port too.
 
-  - job_name: 'AGG1-prod-paid-aggregation-daily-review-agg-retry'
+  - job_name: 'AGG1-prod-paid-name-daily-review-agg-retry'
     ec2_sd_configs:
     - region: us-east-1
       refresh_interval: 300s
@@ -257,10 +182,10 @@ scrape_configs:
       filters:
       - name: tag:Team
         values:
-          - aggregation
+          - name
       - name: tag:Name
         values:
-          - prod-paid-aggregation-daily-review-agg-retry
+          - prod-paid-name-daily-review-agg-retry
       - name: tag:Environment
         values:
           - prod
@@ -273,7 +198,7 @@ scrape_configs:
       target_label: __address__
       replacement: '${1}:9100'   # Have to specify a port too.
 
-  - job_name: 'AGG1-prod-paid-aggregation-competitor-review-agg'
+  - job_name: 'AGG1-prod-paid-name-competitor-review-agg'
     ec2_sd_configs:
     - region: us-east-1
       refresh_interval: 300s
@@ -281,10 +206,10 @@ scrape_configs:
       filters:
       - name: tag:Team
         values:
-          - aggregation
+          - name
       - name: tag:Name
         values:
-          - prod-paid-aggregation-competitor-review-agg
+          - prod-paid-name-competitor-review-agg
       - name: tag:Environment
         values:
           - prod
@@ -297,7 +222,7 @@ scrape_configs:
       target_label: __address__
       replacement: '${1}:9100'   # Have to specify a port too.
 
-  - job_name: 'AGG1-prod-paid-aggregation-reaggregation-review-agg'
+  - job_name: 'AGG1-prod-paid-name-rename-review-agg'
     ec2_sd_configs:
     - region: us-east-1
       refresh_interval: 300s
@@ -305,10 +230,10 @@ scrape_configs:
       filters:
       - name: tag:Team
         values:
-          - aggregation
+          - name
       - name: tag:Name
         values:
-          - prod-paid-aggregation-reaggregation-review-agg
+          - prod-paid-name-rename-review-agg
       - name: tag:Environment
         values:
           - prod
@@ -321,7 +246,7 @@ scrape_configs:
       target_label: __address__
       replacement: '${1}:9100'   # Have to specify a port too.
 
-  - job_name: 'AGG1-prod-paid-aggregation-replies-agg'
+  - job_name: 'AGG1-prod-paid-name-replies-agg'
     ec2_sd_configs:
     - region: us-east-1
       refresh_interval: 300s
@@ -329,10 +254,10 @@ scrape_configs:
       filters:
       - name: tag:Team
         values:
-          - aggregation
+          - name
       - name: tag:Name
         values:
-          - prod-paid-aggregation-replies-agg
+          - prod-paid-name-replies-agg
       - name: tag:Environment
         values:
           - prod
@@ -345,7 +270,7 @@ scrape_configs:
       target_label: __address__
       replacement: '${1}:9100'   # Have to specify a port too.
 
-  - job_name: 'AGG1-prod-paid-aggregation-asg'
+  - job_name: 'AGG1-prod-paid-name-asg'
     ec2_sd_configs:
     - region: us-east-1
       refresh_interval: 120s
@@ -353,7 +278,7 @@ scrape_configs:
       filters:
       - name: tag:Name
         values:
-          - prod-paid-aggregation-asg
+          - prod-paid-name-asg
       - name: tag:Environment
         values:
           - prod
@@ -366,7 +291,7 @@ scrape_configs:
       target_label: __address__
       replacement: '${1}:9100'   # Have to specify a port too.
 
-  - job_name: 'AGG1-free-paid-aggregation-asg'
+  - job_name: 'AGG1-free-paid-name-asg'
     ec2_sd_configs:
     - region: us-east-1
       refresh_interval: 120s
@@ -374,7 +299,7 @@ scrape_configs:
       filters:
       - name: tag:Name
         values:
-          - free-prod-aggregation-asg
+          - free-prod-name-asg
       - name: tag:Environment
         values:
           - freeprod
@@ -394,7 +319,7 @@ scrape_configs:
 #########################################################################
 #########################################################################
 
-  - job_name: 'AGG2-FreeProd-DailyReviewAggregation'
+  - job_name: 'AGG2-name'
     ec2_sd_configs:
     - region: us-east-1
       refresh_interval: 300s
@@ -402,14 +327,14 @@ scrape_configs:
       filters:
       - name: tag:Team
         values:
-          - Aggregation
+          - name
       - name: tag:Name
         values:
-          - FreeProd-DailyReviewAggregation
+          - name
       - name: tag:Environment
         values:
           - FREE-Production
-      role_arn: arn:aws:iam::939261055124:role/birdeye-prometheus-server-role
+      role_arn: arn:aws:iam::939261055124:role/sd-prometheus-server-role
     relabel_configs:
     - source_labels: [__meta_ec2_instance_state]
       regex: running
@@ -420,7 +345,7 @@ scrape_configs:
       replacement: '${1}:9100'   # Have to specify a port too.
 
 
-  - job_name: 'AGG2-FreeProd-DailyReviewAggregationRetry'
+  - job_name: 'AGG2-nameRetry'
     ec2_sd_configs:
     - region: us-east-1
       refresh_interval: 300s
@@ -428,14 +353,14 @@ scrape_configs:
       filters:
       - name: tag:Team
         values:
-          - Aggregation
+          - name
       - name: tag:Name
         values:
-          - FreeProd-DailyReviewAggregationRetry
+          - nameRetry
       - name: tag:Environment
         values:
           - FREE-Production
-      role_arn: arn:aws:iam::939261055124:role/birdeye-prometheus-server-role
+      role_arn: arn:aws:iam::939261055124:role/sd-prometheus-server-role
     relabel_configs:
     - source_labels: [__meta_ec2_instance_state]
       regex: running
@@ -445,7 +370,7 @@ scrape_configs:
       target_label: __address__
       replacement: '${1}:9100'   # Have to specify a port too.
 
-  - job_name: 'AGG2-FreeProd-ReaggregationReviewAggregation'
+  - job_name: 'AGG2-FreeProd-namenamename'
     ec2_sd_configs:
     - region: us-east-1
       refresh_interval: 300s
@@ -453,14 +378,14 @@ scrape_configs:
       filters:
       - name: tag:Team
         values:
-          - Aggregation
+          - name
       - name: tag:Name
         values:
-          - FreeProd-ReaggregationReviewAggregation
+          - FreeProd-namenamename
       - name: tag:Environment
         values:
           - FREE-Production
-      role_arn: arn:aws:iam::939261055124:role/birdeye-prometheus-server-role
+      role_arn: arn:aws:iam::939261055124:role/sd-prometheus-server-role
     relabel_configs:
     - source_labels: [__meta_ec2_instance_state]
       regex: running
@@ -470,7 +395,7 @@ scrape_configs:
       target_label: __address__
       replacement: '${1}:9100'   # Have to specify a port too.
 
-  - job_name: 'AGG2-FreeProd-SearchProfileAggregation'
+  - job_name: 'AGG2-FreeProd-SearchProfilename'
     ec2_sd_configs:
     - region: us-east-1
       refresh_interval: 300s
@@ -478,14 +403,14 @@ scrape_configs:
       filters:
       - name: tag:Team
         values:
-          - Aggregation
+          - name
       - name: tag:Name
         values:
-          - FreeProd-SearchProfileAggregation
+          - FreeProd-SearchProfilename
       - name: tag:Environment
         values:
           - FREE-Production
-      role_arn: arn:aws:iam::939261055124:role/birdeye-prometheus-server-role
+      role_arn: arn:aws:iam::939261055124:role/sd-prometheus-server-role
     relabel_configs:
     - source_labels: [__meta_ec2_instance_state]
       regex: running
@@ -495,7 +420,7 @@ scrape_configs:
       target_label: __address__
       replacement: '${1}:9100'   # Have to specify a port too.
 
-  - job_name: 'AGG2-FreeProd-SearchProfileAggregationRetry-1'
+  - job_name: 'AGG2-FreeProd-SearchProfilenameRetry-1'
     ec2_sd_configs:
     - region: us-east-1
       refresh_interval: 300s
@@ -503,14 +428,14 @@ scrape_configs:
       filters:
       - name: tag:Team
         values:
-          - Aggregation
+          - name
       - name: tag:Name
         values:
-          - FreeProd-SearchProfileAggregationRetry-1
+          - FreeProd-SearchProfilenameRetry-1
       - name: tag:Environment
         values:
           - FREE-Production
-      role_arn: arn:aws:iam::939261055124:role/birdeye-prometheus-server-role
+      role_arn: arn:aws:iam::939261055124:role/sd-prometheus-server-role
     relabel_configs:
     - source_labels: [__meta_ec2_instance_state]
       regex: running
@@ -520,7 +445,7 @@ scrape_configs:
       target_label: __address__
       replacement: '${1}:9100'   # Have to specify a port too.
 
-  - job_name: 'AGG2-prod-paid-aggregation-daily-review-agg'
+  - job_name: 'AGG2-prod-paid-name-daily-review-agg'
     ec2_sd_configs:
     - region: us-east-1
       refresh_interval: 300s
@@ -528,14 +453,14 @@ scrape_configs:
       filters:
       - name: tag:Team
         values:
-          - aggregation
+          - name
       - name: tag:Name
         values:
-          - prod-paid-aggregation-daily-review-agg
+          - prod-paid-name-daily-review-agg
       - name: tag:Environment
         values:
           - prod
-      role_arn: arn:aws:iam::939261055124:role/birdeye-prometheus-server-role
+      role_arn: arn:aws:iam::939261055124:role/sd-prometheus-server-role
     relabel_configs:
     - source_labels: [__meta_ec2_instance_state]
       regex: running
@@ -545,7 +470,7 @@ scrape_configs:
       target_label: __address__
       replacement: '${1}:9100'   # Have to specify a port too.
 
-  - job_name: 'AGG2-prod-paid-aggregation-daily-review-agg-retry'
+  - job_name: 'AGG2-prod-paid-name-daily-review-agg-retry'
     ec2_sd_configs:
     - region: us-east-1
       refresh_interval: 300s
@@ -553,14 +478,14 @@ scrape_configs:
       filters:
       - name: tag:Team
         values:
-          - aggregation
+          - name
       - name: tag:Name
         values:
-          - prod-paid-aggregation-daily-review-agg-retry
+          - prod-paid-name-daily-review-agg-retry
       - name: tag:Environment
         values:
           - prod
-      role_arn: arn:aws:iam::939261055124:role/birdeye-prometheus-server-role
+      role_arn: arn:aws:iam::939261055124:role/sd-prometheus-server-role
     relabel_configs:
     - source_labels: [__meta_ec2_instance_state]
       regex: running
@@ -570,7 +495,7 @@ scrape_configs:
       target_label: __address__
       replacement: '${1}:9100'   # Have to specify a port too.
 
-  - job_name: 'AGG2-prod-paid-aggregation-competitor-review-agg'
+  - job_name: 'AGG2-prod-paid-name-competitor-review-agg'
     ec2_sd_configs:
     - region: us-east-1
       refresh_interval: 300s
@@ -578,14 +503,14 @@ scrape_configs:
       filters:
       - name: tag:Team
         values:
-          - aggregation
+          - name
       - name: tag:Name
         values:
-          - prod-paid-aggregation-competitor-review-agg
+          - prod-paid-name-competitor-review-agg
       - name: tag:Environment
         values:
           - prod
-      role_arn: arn:aws:iam::939261055124:role/birdeye-prometheus-server-role
+      role_arn: arn:aws:iam::939261055124:role/sd-prometheus-server-role
     relabel_configs:
     - source_labels: [__meta_ec2_instance_state]
       regex: running
@@ -595,7 +520,7 @@ scrape_configs:
       target_label: __address__
       replacement: '${1}:9100'   # Have to specify a port too.
 
-  - job_name: 'AGG2-prod-paid-aggregation-reaggregation-review-agg'
+  - job_name: 'AGG2-prod-paid-name-rename-review-agg'
     ec2_sd_configs:
     - region: us-east-1
       refresh_interval: 300s
@@ -603,14 +528,14 @@ scrape_configs:
       filters:
       - name: tag:Team
         values:
-          - aggregation
+          - name
       - name: tag:Name
         values:
-          - prod-paid-aggregation-reaggregation-review-agg
+          - prod-paid-name-rename-review-agg
       - name: tag:Environment
         values:
           - prod
-      role_arn: arn:aws:iam::939261055124:role/birdeye-prometheus-server-role
+      role_arn: arn:aws:iam::939261055124:role/sd-prometheus-server-role
     relabel_configs:
     - source_labels: [__meta_ec2_instance_state]
       regex: running
@@ -620,7 +545,7 @@ scrape_configs:
       target_label: __address__
       replacement: '${1}:9100'   # Have to specify a port too.
 
-  - job_name: 'AGG2-prod-paid-aggregation-replies-agg'
+  - job_name: 'AGG2-prod-paid-name-replies-agg'
     ec2_sd_configs:
     - region: us-east-1
       refresh_interval: 300s
@@ -628,14 +553,14 @@ scrape_configs:
       filters:
       - name: tag:Team
         values:
-          - aggregation
+          - name
       - name: tag:Name
         values:
-          - prod-paid-aggregation-replies-agg
+          - prod-paid-name-replies-agg
       - name: tag:Environment
         values:
           - prod
-      role_arn: arn:aws:iam::939261055124:role/birdeye-prometheus-server-role
+      role_arn: arn:aws:iam::939261055124:role/sd-prometheus-server-role
     relabel_configs:
     - source_labels: [__meta_ec2_instance_state]
       regex: running
@@ -645,7 +570,7 @@ scrape_configs:
       target_label: __address__
       replacement: '${1}:9100'   # Have to specify a port too.
 
-  - job_name: 'AGG2-prod-paid-aggregation-asg'
+  - job_name: 'AGG2-prod-paid-name-asg'
     ec2_sd_configs:
     - region: us-east-1
       refresh_interval: 120s
@@ -653,11 +578,11 @@ scrape_configs:
       filters:
       - name: tag:Name
         values:
-          - prod-paid-aggregation-asg
+          - prod-paid-name-asg
       - name: tag:Environment
         values:
           - prod
-      role_arn: arn:aws:iam::939261055124:role/birdeye-prometheus-server-role
+      role_arn: arn:aws:iam::939261055124:role/sd-prometheus-server-role
     relabel_configs:
     - source_labels: [__meta_ec2_instance_state]
       regex: running
@@ -667,7 +592,7 @@ scrape_configs:
       target_label: __address__
       replacement: '${1}:9100'   # Have to specify a port too.
 
-  - job_name: 'AGG2-free-paid-aggregation-asg'
+  - job_name: 'AGG2-free-paid-name-asg'
     ec2_sd_configs:
     - region: us-east-1
       refresh_interval: 120s
@@ -675,11 +600,11 @@ scrape_configs:
       filters:
       - name: tag:Name
         values:
-          - free-prod-aggregation-asg
+          - free-prod-name-asg
       - name: tag:Environment
         values:
           - freeprod
-      role_arn: arn:aws:iam::939261055124:role/birdeye-prometheus-server-role
+      role_arn: arn:aws:iam::939261055124:role/sd-prometheus-server-role
     relabel_configs:
     - source_labels: [__meta_ec2_instance_state]
       regex: running
